@@ -1,30 +1,39 @@
 import axios from 'axios';
+import Notiflix from 'notiflix';
+
 // import { fetchBreeds } from "./cat-api";
 
 axios.defaults.headers.common['x-api-key'] =
   'live_OrI2CQkYifKys4YRbxKEQWDTTHiRPLxMF2MrCIzjzxwK18XloitcucZdJi4JglLj';
 
 const selectBreeds = document.querySelector('.breed-select');
-const catInfo = document.querySelector('.cat-info')
+const catInfoEl = document.querySelector('.cat-info');
+const loaderEl = document.querySelector('.loader')
+const errorEl = document.querySelector('.error')
+
+
 
 
 function fetchBreeds() {
+  errorEl.style.visibility = "hidden"
   return axios
     .get('https://api.thecatapi.com/v1/breeds')
-    .then(function (response) {
-      const cats = response.data;
-  
-      selectBreeds.innerHTML = createMarkup(cats);
+    .then(response => {
+      loaderEl.style.visibility = "hidden"
+      const breeds = response.data;
+
+      selectBreeds.innerHTML = createMarkup(breeds);
     })
-    .catch(function (error) {
-      console.log(error);
+    .catch(error => {
+      loaderEl.style.visibility = "hidden"
+      errorEl.style.visibility = "visible"
+      Notiflix.Notify.failure('Oops! Something went wrong! Try reloading the page!', error);
+      
     });
 }
 
-fetchBreeds();
-
-function createMarkup(cats) {
-  return cats
+function createMarkup(breeds) {
+  return breeds
     .map(
       ({ id, name }) =>
         `<option value ="${id}">${name}
@@ -34,30 +43,48 @@ function createMarkup(cats) {
     .join('');
 }
 
+fetchBreeds();
+
 selectBreeds.addEventListener('change', onOptionClick);
 
 function onOptionClick(event) {
-  let catsId = event.target.value
-  fetchCatByBreed(catsId);
-  
+  catInfoEl.innerHTML = ""
+  loaderEl.style.visibility = "visible"
+
+  let breedId = event.target.value;
+  fetchCatByBreed(breedId);
 }
-
-`<img src ="${imageURL}" alt="cat"> />`
-
 
 function fetchCatByBreed(breedId) {
   const URL = 'https://api.thecatapi.com/v1/images/search';
 
-  return fetch(`${URL}?breed_ids=${breedId}`)
+  return axios
+    .get(`${URL}?breed_ids=${breedId}`)
     .then(response => {
-      const imageURL = response.url;
-      console.log(imageURL)
-      catInfo.insertAdjacentHTML("beforeend", `<img src ="${imageURL}" alt="cat">`)
-      console.log(response)
+      loaderEl.style.visibility = "hidden"
+      const catInfo = response.data[0];
+      console.log(catInfo.url)
+      createCatInfoMarkup(catInfo)
+
+     
     })
     .catch(error => {
-      console.log(error);
+      loaderEl.style.visibility = "hidden"
+      errorEl.style.visibility = "visible"
+      Notiflix.Notify.failure('Oops! Something went wrong! Try reloading the page!', error);
+      
     });
 }
 
+function createCatInfoMarkup (catInfo) {
 
+  const { url, breeds: { 0: { description, name, temperament } } } = catInfo
+
+  const htmlString = `<h2>${name}</h2>
+  <img src ="${url}" alt="cat">
+  <p>${description}</p>
+  <p>Temperament: ${temperament}</p>`
+
+  return catInfoEl.insertAdjacentHTML("beforeend", htmlString)
+    
+}
