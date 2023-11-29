@@ -41,3 +41,16 @@
       transform: rotate(-360deg);
     }
   }  
+
+  .cat-description {
+    display: block;
+    font-style: italic;
+  }
+
+  .cat-name {
+    color: darkolivegreen;
+  }
+
+  .cat-info {
+    width: 400px;
+  }
