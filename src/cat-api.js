@@ -1,30 +1,20 @@
-
+import axios from 'axios';
+export { fetchBreeds, fetchCatByBreed };
 
 
 
 function fetchBreeds() {
-    
-    errorEl.style.visibility = 'hidden';
-    return axios
-      .get('https://api.thecatapi.com/v1/breeds')
-      .then(response => {
-        loaderEl.style.visibility = 'hidden';
-        const breeds = response.data;
+
+  return axios.get('https://api.thecatapi.com/v1/breeds')
   
-        selectBreeds.innerHTML = createMarkup(breeds);
-      })
-      .catch(error => {
-        loaderEl.style.visibility = 'hidden';
-        errorEl.style.visibility = 'visible';
-        Notiflix.Notify.failure(
-          'Oops! Something went wrong! Try reloading the page!',
-          error
-        );
-      });
-  }
+}
 
-  export { fetchBreeds };
+function fetchCatByBreed(breedId) {
+  const URL = 'https://api.thecatapi.com/v1/images/search';
 
-
+  return axios
+    .get(`${URL}?breed_ids=${breedId}`)
+    
+}
 
 
